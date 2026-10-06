@@ -5,12 +5,15 @@ import { SEED_USERS } from '@/lib/seedData';
 import { DirectMessage, User } from '@/types/models';
 import { useAuth } from '@/features/auth/AuthContext';
 import { BeltBadge } from '@/components/shared/BeltBadge';
-import { Send, CheckCheck, Smile, Flame } from 'lucide-react';
+import { Send, CheckCheck, Smile, Flame, Phone, Video, Play, Volume2 } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
+import { VoiceVideoRecorder } from '@/features/chat/VoiceVideoRecorder';
+import { CallModal } from '@/features/chat/CallModal';
 
 export default function MessagesPage() {
   const { currentUser, addXP } = useAuth();
   const [selectedFriend, setSelectedFriend] = useState<User>(SEED_USERS[1]); // Maya Lin
+  const [activeCall, setActiveCall] = useState<'voice' | 'video' | null>(null);
   const [messages, setMessages] = useState<DirectMessage[]>([
     {
       id: 'msg-1',
@@ -119,9 +122,25 @@ export default function MessagesPage() {
               <span className="text-[11px] text-emerald-500 font-medium">Online • Active in Dojo</span>
             </div>
           </div>
-          <div className="flex items-center gap-1.5 text-xs text-rose-500 font-bold bg-rose-500/10 px-2.5 py-1 rounded-full">
-            <Flame className="w-3.5 h-3.5 fill-rose-500" />
-            <span>12 Day Streak</span>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setActiveCall('voice')}
+              className="p-2 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground transition"
+              title="Start voice call"
+            >
+              <Phone className="w-4 h-4 text-emerald-400" />
+            </button>
+            <button
+              onClick={() => setActiveCall('video')}
+              className="p-2 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground transition"
+              title="Start HD video call"
+            >
+              <Video className="w-4 h-4 text-cyan-400" />
+            </button>
+            <div className="flex items-center gap-1.5 text-xs text-rose-500 font-bold bg-rose-500/10 px-2.5 py-1 rounded-full ml-2">
+              <Flame className="w-3.5 h-3.5 fill-rose-500" />
+              <span>12 Day Streak</span>
+            </div>
           </div>
         </div>
 
@@ -134,15 +153,37 @@ export default function MessagesPage() {
                 key={m.id}
                 className={`flex flex-col max-w-[75%] ${isMe ? 'self-end items-end' : 'self-start items-start'}`}
               >
-                <div
-                  className={`p-3 rounded-2xl text-xs leading-relaxed ${
-                    isMe
-                      ? 'bg-primary text-primary-foreground rounded-br-none'
-                      : 'bg-secondary text-foreground rounded-bl-none border border-border/60'
-                  }`}
-                >
-                  {m.content}
-                </div>
+                {/* Media renderers for Voice Notes and Circular Video messages */}
+                {m.media_type === 'voice' ? (
+                  <div
+                    className={`p-3 rounded-2xl flex items-center gap-3 ${
+                      isMe ? 'bg-primary text-primary-foreground' : 'bg-secondary text-foreground'
+                    }`}
+                  >
+                    <button className="p-2 bg-black/20 rounded-full">
+                      <Play className="w-4 h-4 fill-current" />
+                    </button>
+                    <div className="flex flex-col">
+                      <span className="font-mono text-xs font-semibold">Voice Message ({m.duration_sec || 5}s)</span>
+                      {m.transcript && <span className="text-[10px] opacity-80 italic">{m.transcript}</span>}
+                    </div>
+                  </div>
+                ) : m.media_type === 'video_circle' ? (
+                  <div className="w-36 h-36 rounded-full overflow-hidden border-2 border-primary shadow-lg bg-black">
+                    <video src={m.media_url} autoPlay loop muted playsInline className="w-full h-full object-cover" />
+                  </div>
+                ) : (
+                  <div
+                    className={`p-3 rounded-2xl text-xs leading-relaxed ${
+                      isMe
+                        ? 'bg-primary text-primary-foreground rounded-br-none'
+                        : 'bg-secondary text-foreground rounded-bl-none border border-border/60'
+                    }`}
+                  >
+                    {m.content}
+                  </div>
+                )}
+
                 <div className="flex items-center gap-1 mt-1 text-[10px] text-muted-foreground">
                   <span>{formatDistanceToNow(new Date(m.created_at), { addSuffix: true })}</span>
                   {isMe && <CheckCheck className="w-3 h-3 text-cyan-400" />}
@@ -152,14 +193,33 @@ export default function MessagesPage() {
           })}
         </div>
 
-        {/* Chat Input */}
-        <form onSubmit={handleSendMessage} className="p-3 border-t border-border/80 flex gap-2">
+        {/* Chat Input Bar */}
+        <form onSubmit={handleSendMessage} className="p-3 border-t border-border/80 flex items-center gap-2">
           <input
             type="text"
             placeholder="Type your message..."
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
             className="flex-1 bg-secondary/50 border border-border/80 rounded-2xl px-4 py-2.5 text-xs focus:outline-none focus:ring-1 focus:ring-primary"
+          />
+          <VoiceVideoRecorder
+            onSendMedia={(type, url, durationSec, transcript) => {
+              const newMsg: DirectMessage = {
+                id: `msg-${Date.now()}`,
+                conversation_id: 'conv-1',
+                sender_id: currentUser?.id || 'user-demo',
+                sender: currentUser || SEED_USERS[6],
+                content: type === 'voice' ? 'Voice Message' : 'Video Circle',
+                media_url: url,
+                media_type: type,
+                duration_sec: durationSec,
+                transcript: transcript,
+                is_read: false,
+                created_at: new Date().toISOString(),
+              };
+              setMessages([...messages, newMsg]);
+              addXP(10);
+            }}
           />
           <button
             type="submit"
@@ -170,6 +230,16 @@ export default function MessagesPage() {
             <span>Send</span>
           </button>
         </form>
+
+        {/* LiveKit Call Modal */}
+        {activeCall && (
+          <CallModal
+            recipientName={selectedFriend.display_name}
+            recipientAvatar={selectedFriend.avatar_url}
+            callType={activeCall}
+            onEndCall={() => setActiveCall(null)}
+          />
+        )}
       </div>
     </div>
   );
