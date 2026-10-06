@@ -73,8 +73,8 @@ export default function StoryChainsPage() {
         </div>
         <h1 className="text-2xl font-black tracking-tight mb-2">Collaborative Story Chains</h1>
         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-lg">
-          One ninja starts the story with an opening sentence. Community members propose the next branch.
-          The clan votes on the top continuation each round to build an epic collaborative episode!
+          One creator starts the story with an opening sentence. Community members propose the next branch.
+          The community votes on the top continuation each round to build an epic collaborative episode!
         </p>
       </div>
 

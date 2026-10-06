@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -17,13 +17,15 @@ import {
   Camera,
   Timer,
   Radio,
-  MapPin
+  MapPin,
+  LogIn
 } from 'lucide-react';
 import { Logo } from '@/components/shared/Logo';
 import { BeltBadge } from '@/components/shared/BeltBadge';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useTheme } from '@/components/layout/ThemeProvider';
 import { useI18n } from '@/features/i18n/LanguageContext';
+import { AuthModal } from '@/features/auth/AuthModal';
 import { cn } from '@/lib/utils';
 
 export const Sidebar: React.FC<{ onOpenFocusMode?: () => void; onOpenSnapCamera?: () => void }> = ({
@@ -34,6 +36,7 @@ export const Sidebar: React.FC<{ onOpenFocusMode?: () => void; onOpenSnapCamera?
   const { currentUser } = useAuth();
   const { theme, toggleTheme } = useTheme();
   const { lang, setLang, t } = useI18n();
+  const [isAuthOpen, setIsAuthOpen] = useState(false);
 
   const navItems = [
     { label: t.feed_wall, href: '/', icon: Home },
@@ -49,42 +52,56 @@ export const Sidebar: React.FC<{ onOpenFocusMode?: () => void; onOpenSnapCamera?
   ];
 
   return (
-    <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 bg-card border-r border-border p-4 justify-between select-none">
-      <div className="flex flex-col gap-6">
-        {/* Brand Header */}
-        <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center group">
-            <Logo size={36} showWordmark={true} />
-          </Link>
-          <button
-            onClick={toggleTheme}
-            aria-label="Toggle dark/light theme"
-            className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition"
-          >
-            {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
-          </button>
-        </div>
+    <>
+      <aside className="hidden md:flex flex-col w-64 h-screen sticky top-0 bg-card border-r border-border p-4 justify-between select-none">
+        <div className="flex flex-col gap-6">
+          {/* Brand Header */}
+          <div className="flex items-center justify-between">
+            <Link href="/" className="flex items-center group">
+              <Logo size={36} showWordmark={true} />
+            </Link>
+            <button
+              onClick={toggleTheme}
+              aria-label="Toggle dark/light theme"
+              className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-secondary/60 transition"
+            >
+              {theme === 'dark' ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4 text-slate-700" />}
+            </button>
+          </div>
 
-        {/* Current User Quick Badge */}
-        {currentUser && (
-          <div className="p-3 rounded-2xl bg-secondary/50 border border-border/50 flex flex-col gap-2">
-            <div className="flex items-center gap-2.5">
-              <img
-                src={currentUser.avatar_url}
-                alt={currentUser.display_name}
-                className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/30"
-              />
-              <div className="flex flex-col overflow-hidden">
-                <span className="font-medium text-sm truncate">{currentUser.display_name}</span>
-                <span className="text-xs text-muted-foreground truncate">@{currentUser.username}</span>
+          {/* Current User Quick Badge */}
+          {currentUser ? (
+            <div
+              onClick={() => setIsAuthOpen(true)}
+              role="button"
+              tabIndex={0}
+              className="p-3 rounded-2xl bg-secondary/50 border border-border/50 flex flex-col gap-2 cursor-pointer hover:bg-secondary/80 transition group"
+            >
+              <div className="flex items-center gap-2.5">
+                <img
+                  src={currentUser.avatar_url}
+                  alt={currentUser.display_name}
+                  className="w-10 h-10 rounded-full object-cover ring-2 ring-primary/30 group-hover:ring-primary/60 transition"
+                />
+                <div className="flex flex-col overflow-hidden">
+                  <span className="font-medium text-sm truncate">{currentUser.display_name}</span>
+                  <span className="text-xs text-muted-foreground truncate">@{currentUser.username}</span>
+                </div>
+              </div>
+              <div className="flex items-center justify-between mt-1">
+                <BeltBadge xp={currentUser.xp} size="sm" />
+                <span className="text-xs font-semibold text-rose-500">{currentUser.xp} XP</span>
               </div>
             </div>
-            <div className="flex items-center justify-between mt-1">
-              <BeltBadge xp={currentUser.xp} size="sm" />
-              <span className="text-xs font-semibold text-rose-500">{currentUser.xp} XP</span>
-            </div>
-          </div>
-        )}
+          ) : (
+            <button
+              onClick={() => setIsAuthOpen(true)}
+              className="w-full flex items-center justify-center gap-2 p-2.5 rounded-xl bg-primary text-primary-foreground font-semibold text-xs shadow-sm hover:opacity-90 transition"
+            >
+              <LogIn className="w-4 h-4" />
+              <span>Войти / Регистрация</span>
+            </button>
+          )}
 
         {/* Navigation Links */}
         <nav className="flex flex-col gap-1.5" aria-label="Main Navigation">
@@ -149,5 +166,8 @@ export const Sidebar: React.FC<{ onOpenFocusMode?: () => void; onOpenSnapCamera?
         )}
       </div>
     </aside>
+
+    <AuthModal isOpen={isAuthOpen} onClose={() => setIsAuthOpen(false)} />
+    </>
   );
 };

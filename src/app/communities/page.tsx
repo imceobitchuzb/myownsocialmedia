@@ -22,11 +22,11 @@ export default function CommunitiesPage() {
       <div className="bg-gradient-to-r from-cyan-950/60 via-card to-secondary/80 border border-cyan-500/30 rounded-3xl p-6 shadow-sm">
         <div className="flex items-center gap-2 text-cyan-400 mb-2">
           <Users className="w-5 h-5" />
-          <span className="text-xs font-bold uppercase tracking-wider">Ninja Clans</span>
+          <span className="text-xs font-bold uppercase tracking-wider">Executive Guilds</span>
         </div>
         <h1 className="text-2xl font-black tracking-tight mb-2">Explore Communities</h1>
         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-          Find your niche clan. Share exclusive wall posts, collaborate on specialized challenges, and level up together.
+          Find your niche community. Share exclusive wall posts, collaborate on specialized challenges, and level up together.
         </p>
       </div>
 
@@ -50,7 +50,7 @@ export default function CommunitiesPage() {
                   />
                   <div className="mt-8">
                     <h2 className="font-bold text-base leading-tight">{comm.name}</h2>
-                    <span className="text-xs text-muted-foreground">{comm.members_count.toLocaleString()} ninjas</span>
+                    <span className="text-xs text-muted-foreground">{comm.members_count.toLocaleString()} members</span>
                   </div>
                 </div>
 

@@ -1,14 +1,16 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
 import { SEED_USERS, SEED_POSTS } from '@/lib/seedData';
 import { BeltBadge } from '@/components/shared/BeltBadge';
 import { XPProgressBar } from '@/components/shared/XPProgressBar';
 import { PostCard } from '@/features/feed/PostCard';
 import { useAuth } from '@/features/auth/AuthContext';
-import { Edit3, UserPlus, Check, MessageSquare, Shield, Calendar } from 'lucide-react';
+import { Edit3, UserPlus, Check, MessageSquare, Shield, Calendar, UserCheck } from 'lucide-react';
 import { CreatorAnalytics } from '@/features/profile/CreatorAnalytics';
+import { socialDataService } from '@/lib/socialDataService';
+import { Post } from '@/types/models';
 
 export default function ProfilePage() {
   const params = useParams();
@@ -21,9 +23,44 @@ export default function ProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [statusLine, setStatusLine] = useState(user.status_line);
   const [bio, setBio] = useState(user.bio);
-  const [friendRequested, setFriendRequested] = useState(false);
+  const [isFollowing, setIsFollowing] = useState(false);
+  const [followStats, setFollowStats] = useState({ followersCount: 42, followingCount: 18 });
+  const [wallPosts, setWallPosts] = useState<Post[]>(SEED_POSTS.filter((p) => p.author_id === user.id));
 
-  const userPosts = SEED_POSTS.filter((p) => p.author_id === user.id);
+  useEffect(() => {
+    socialDataService.getPosts().then((posts) => {
+      const filtered = posts.filter((p) => p.author_id === user.id || p.author?.username === user.username);
+      if (filtered.length > 0) {
+        setWallPosts(filtered);
+      }
+    });
+
+    if (currentUser && currentUser.id !== user.id) {
+      socialDataService.isFollowing(currentUser.id, user.id).then((res) => {
+        setIsFollowing(res);
+      });
+    }
+
+    socialDataService.getFollowStats(user.id).then((stats) => {
+      if (stats.followersCount > 0 || stats.followingCount > 0) {
+        setFollowStats(stats);
+      }
+    });
+  }, [user.id, user.username, currentUser]);
+
+  const handleToggleFollow = async () => {
+    if (!currentUser || isOwnProfile) return;
+    if (isFollowing) {
+      await socialDataService.unfollowUser(currentUser.id, user.id);
+      setIsFollowing(false);
+      setFollowStats((prev) => ({ ...prev, followersCount: Math.max(0, prev.followersCount - 1) }));
+    } else {
+      await socialDataService.followUser(currentUser.id, user.id);
+      setIsFollowing(true);
+      setFollowStats((prev) => ({ ...prev, followersCount: prev.followersCount + 1 }));
+      addXP(10, 'follow_user', `follow_${user.id}`);
+    }
+  };
 
   const handleSaveProfile = (e: React.FormEvent) => {
     e.preventDefault();
@@ -66,11 +103,15 @@ export default function ProfilePage() {
                 </button>
               ) : (
                 <button
-                  onClick={() => setFriendRequested(!friendRequested)}
-                  className="px-4 py-2 bg-primary text-primary-foreground text-xs font-semibold rounded-xl hover:opacity-90 transition flex items-center gap-1.5 shadow-sm"
+                  onClick={handleToggleFollow}
+                  className={`px-4 py-2 text-xs font-semibold rounded-xl transition flex items-center gap-1.5 shadow-sm ${
+                    isFollowing
+                      ? 'bg-secondary text-foreground hover:bg-secondary/80 border border-border'
+                      : 'bg-primary text-primary-foreground hover:opacity-90 shadow-primary/20'
+                  }`}
                 >
-                  {friendRequested ? <Check className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
-                  <span>{friendRequested ? 'Request Sent' : 'Add Friend'}</span>
+                  {isFollowing ? <Check className="w-3.5 h-3.5" /> : <UserPlus className="w-3.5 h-3.5" />}
+                  <span>{isFollowing ? 'Following' : 'Follow'}</span>
                 </button>
               )}
             </div>
@@ -91,6 +132,12 @@ export default function ProfilePage() {
 
             {/* Bio */}
             <p className="text-xs sm:text-sm text-foreground/90 leading-relaxed mt-1">{user.bio}</p>
+
+            {/* Follow Stats */}
+            <div className="flex items-center gap-4 text-xs text-muted-foreground mt-2">
+              <span><strong className="text-foreground">{followStats.followersCount}</strong> Followers</span>
+              <span><strong className="text-foreground">{followStats.followingCount}</strong> Following</span>
+            </div>
 
             {/* XP Progression Bar */}
             <div className="mt-3 p-3 bg-secondary/40 rounded-2xl border border-border/60">
@@ -150,17 +197,17 @@ export default function ProfilePage() {
         <h2 className="text-base font-bold flex items-center gap-2">
           <span>Personal Wall Posts</span>
           <span className="text-xs px-2 py-0.5 rounded-full bg-secondary text-muted-foreground">
-            {userPosts.length}
+            {wallPosts.length}
           </span>
         </h2>
 
-        {userPosts.length > 0 ? (
-          userPosts.map((post) => (
+        {wallPosts.length > 0 ? (
+          wallPosts.map((post) => (
             <PostCard key={post.id} post={post} currentUser={currentUser} />
           ))
         ) : (
           <div className="bg-card border border-border rounded-2xl p-8 text-center text-muted-foreground text-xs">
-            No wall posts yet. Share something with the clan!
+            No wall posts yet. Share something with your network!
           </div>
         )}
       </div>

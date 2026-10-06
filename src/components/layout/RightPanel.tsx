@@ -9,14 +9,14 @@ import { Trophy, Flame, Sparkles } from 'lucide-react';
 export const RightPanel: React.FC = () => {
   return (
     <aside className="hidden lg:flex flex-col w-80 h-screen sticky top-0 bg-card border-l border-border p-4 gap-6 overflow-y-auto select-none">
-      {/* Ninja Leaderboard */}
+      {/* Executive Leaderboard */}
       <div className="bg-secondary/40 border border-border/60 rounded-2xl p-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Trophy className="w-4 h-4 text-amber-500" />
             <h3 className="font-bold text-xs uppercase tracking-wider">Belt Leaderboard</h3>
           </div>
-          <span className="text-[10px] text-muted-foreground">Top Clans</span>
+          <span className="text-[10px] text-muted-foreground">Top Leaders</span>
         </div>
 
         <div className="flex flex-col gap-2.5">
@@ -50,10 +50,10 @@ export const RightPanel: React.FC = () => {
       <div className="bg-rose-500/5 border border-rose-500/20 rounded-2xl p-4">
         <div className="flex items-center gap-2 mb-2 text-rose-500">
           <Flame className="w-4 h-4 fill-rose-500" />
-          <h3 className="font-bold text-xs uppercase tracking-wider">Dojo Streaks</h3>
+          <h3 className="font-bold text-xs uppercase tracking-wider">Active Streaks</h3>
         </div>
         <p className="text-xs text-muted-foreground leading-relaxed mb-3">
-          Exchange daily snaps with clan members to keep streaks burning.
+          Exchange daily snaps with network connections to keep streaks burning.
         </p>
         <div className="flex items-center justify-between p-2.5 bg-card rounded-xl border border-border/80">
           <div className="flex items-center gap-2">
@@ -98,7 +98,7 @@ export const RightPanel: React.FC = () => {
                 />
                 <div className="flex flex-col">
                   <span className="text-xs font-semibold truncate max-w-[120px]">{comm.name}</span>
-                  <span className="text-[10px] text-muted-foreground">{comm.members_count} ninjas</span>
+                  <span className="text-[10px] text-muted-foreground">{comm.members_count} members</span>
                 </div>
               </div>
             </Link>
