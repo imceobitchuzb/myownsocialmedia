@@ -126,9 +126,10 @@ export default function FriendsMapPage() {
 
       {/* OpenStreetMap Interactive Stage */}
       <div className="relative w-full h-[520px] bg-slate-950 border border-border/80 rounded-3xl overflow-hidden shadow-xl flex flex-col">
-        {/* OpenStreetMap Real Live Map Tile Iframe */}
+        {/* OpenStreetMap Real Live Map Tile Iframe with lazy loading */}
         <iframe
           title="OpenStreetMap Live Interactive View"
+          loading="lazy"
           src={`https://www.openstreetmap.org/export/embed.html?bbox=25.0%2C30.0%2C145.0%2C65.0&layer=mapnik&marker=${
             myCoords ? `${myCoords.lat}%2C${myCoords.lng}` : '55.7558%2C37.6173'
           }`}
