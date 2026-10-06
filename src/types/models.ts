@@ -1,17 +1,38 @@
-import React from 'react';
-import { cn } from '@/lib/utils';
+export interface UserPrivacySettings {
+  profileVisibility: 'everyone' | 'friends' | 'nobody';
+  wallVisibility: 'everyone' | 'friends';
+  friendsListVisibility: 'everyone' | 'friends' | 'nobody';
+  birthdayVisibility: 'everyone' | 'friends' | 'nobody';
+  whoCanMessage: 'everyone' | 'friends';
+  whoCanCall: 'everyone' | 'friends' | 'nobody';
+  whoCanSeeLocation: 'friends' | 'selected' | 'nobody';
+  findableByUsername: boolean;
+  lastSeenVisibility: 'everyone' | 'friends' | 'nobody';
+}
 
 export interface User {
   id: string;
   username: string;
   display_name: string;
   avatar_url: string;
+  cover_url?: string;
   bio: string;
   status_line: string;
   xp: number;
   belt_rank: string;
   age: number;
   is_admin?: boolean;
+  // Extended VK-level fields
+  birthday?: string;
+  city?: string;
+  websites?: string[];
+  pronouns?: string;
+  relationship_status?: string;
+  interests?: string[];
+  accent_color?: string;
+  pinned_post_id?: string;
+  privacy_settings?: UserPrivacySettings;
+  username_last_changed?: string;
 }
 
 export interface Post {
@@ -73,7 +94,12 @@ export interface DirectMessage {
   sender: User;
   content: string;
   media_url?: string;
+  media_type?: 'text' | 'voice' | 'video_circle' | 'image' | 'file';
+  duration_sec?: number;
+  transcript?: string;
   is_read: boolean;
+  is_edited?: boolean;
+  reactions?: Record<string, string[]>;
   created_at: string;
 }
 

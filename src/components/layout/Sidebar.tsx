@@ -38,6 +38,7 @@ export const Sidebar: React.FC<{ onOpenFocusMode?: () => void; onOpenSnapCamera?
     { label: 'Messages', href: '/messages', icon: MessageSquare },
     { label: 'Communities', href: '/communities', icon: Users },
     { label: 'My Wall & Profile', href: currentUser ? `/profile/${currentUser.username}` : '/profile/demo_user', icon: UserIcon },
+    { label: 'Settings & Privacy', href: '/settings', icon: Sparkles },
     { label: 'Moderation', href: '/admin/moderation', icon: ShieldAlert, adminOnly: true },
   ];
 

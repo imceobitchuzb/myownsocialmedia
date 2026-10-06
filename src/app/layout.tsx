@@ -4,6 +4,7 @@ import './globals.css';
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
 import { AuthProvider } from '@/features/auth/AuthContext';
 import { MainLayout } from '@/components/layout/MainLayout';
+import { BackendModeIndicator } from '@/components/shared/BackendModeIndicator';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -23,6 +24,7 @@ export default function RootLayout({
         <ThemeProvider>
           <AuthProvider>
             <MainLayout>{children}</MainLayout>
+            <BackendModeIndicator />
           </AuthProvider>
         </ThemeProvider>
       </body>
