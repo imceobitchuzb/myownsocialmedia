@@ -15,7 +15,9 @@ import {
   Moon,
   Sun,
   Camera,
-  Timer
+  Timer,
+  Radio,
+  MapPin
 } from 'lucide-react';
 import { Logo } from '@/components/shared/Logo';
 import { BeltBadge } from '@/components/shared/BeltBadge';
@@ -33,6 +35,8 @@ export const Sidebar: React.FC<{ onOpenFocusMode?: () => void; onOpenSnapCamera?
 
   const navItems = [
     { label: 'Feed & Wall', href: '/', icon: Home },
+    { label: 'Friends Radar', href: '/map', icon: MapPin },
+    { label: 'Live Streams', href: '/live', icon: Radio, badge: 'Live' },
     { label: 'Story Chains', href: '/chains', icon: Sparkles, badge: 'Hot' },
     { label: 'Weekly Challenges', href: '/challenges', icon: Trophy },
     { label: 'Messages', href: '/messages', icon: MessageSquare },
