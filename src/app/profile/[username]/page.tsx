@@ -8,6 +8,7 @@ import { XPProgressBar } from '@/components/shared/XPProgressBar';
 import { PostCard } from '@/features/feed/PostCard';
 import { useAuth } from '@/features/auth/AuthContext';
 import { Edit3, UserPlus, Check, MessageSquare, Shield, Calendar } from 'lucide-react';
+import { CreatorAnalytics } from '@/features/profile/CreatorAnalytics';
 
 export default function ProfilePage() {
   const params = useParams();
@@ -140,6 +141,9 @@ export default function ProfilePage() {
           </form>
         </div>
       )}
+
+      {/* Creator Analytics Panel */}
+      <CreatorAnalytics />
 
       {/* Profile Wall Posts */}
       <div className="flex flex-col gap-4">
