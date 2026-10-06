@@ -1,4 +1,4 @@
--- NinjaLoop Row Level Security Policies
+-- CEOWEB Row Level Security Policies
 -- Supabase Migration: 20261006000002_rls_policies.sql
 
 ALTER TABLE public.profiles ENABLE ROW LEVEL SECURITY;

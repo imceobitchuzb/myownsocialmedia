@@ -47,7 +47,7 @@ export default function ModerationPage() {
         </div>
         <h1 className="text-2xl font-black tracking-tight mb-2">Content Moderation & Safety</h1>
         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-          Review community reports, enforce the NinjaLoop code of honor, and maintain safety for all clan members (13+ compliance).
+          Review community reports, enforce the CEOWEB code of honor, and maintain safety for all clan members (13+ compliance).
         </p>
       </div>
 

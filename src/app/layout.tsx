@@ -8,8 +8,8 @@ import { MainLayout } from '@/components/layout/MainLayout';
 const inter = Inter({ subsets: ['latin'] });
 
 export const metadata: Metadata = {
-  title: 'NinjaLoop - Ephemeral Social Network & Dojo',
-  description: 'Gamified social network blending ephemeral stories, VK wall mechanics, belt ranks progression, and collaborative story chains.',
+  title: 'CEOWEB - Executive Social Network & Leadership Guilds',
+  description: 'Master your network, share your vision, and lead with your circle. Combines ephemeral stories, wall mechanics, belt ranks progression, and collaborative story chains.',
 };
 
 export default function RootLayout({

@@ -21,7 +21,7 @@ export const FocusModeModal: React.FC<FocusModeModalProps> = ({ isOpen, onClose 
       }, 1000);
     } else if (secondsRemaining === 0 && isActive) {
       setIsActive(false);
-      alert('Focus session complete! Your mind is sharpened. Great job ninja!');
+      alert('Focus session complete! Your mind is sharpened. Great job executive!');
     }
     return () => clearInterval(interval);
   }, [isActive, secondsRemaining]);

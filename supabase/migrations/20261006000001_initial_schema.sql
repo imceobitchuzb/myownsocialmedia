@@ -1,4 +1,4 @@
--- NinjaLoop Database Schema
+-- CEOWEB Database Schema
 -- Supabase Migration: 20261006000001_initial_schema.sql
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";

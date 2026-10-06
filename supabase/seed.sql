@@ -1,4 +1,4 @@
--- NinjaLoop Seed Data for Supabase
+-- CEOWEB Seed Data for Supabase
 -- Populates demo users, initial wall posts, ephemeral stories, and challenges
 
 INSERT INTO public.profiles (id, username, display_name, avatar_url, bio, status_line, xp, belt_rank, age, is_admin)
@@ -16,6 +16,6 @@ ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO public.posts (id, author_id, content, media_urls, mood, privacy, likes_count, comments_count)
 VALUES
-  ('20000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'Just deployed our custom sharding layer for the NinjaLoop stream! Latency dropped under 18ms across all WebSocket regions.', ARRAY['https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80'], 'study', 'public', 34, 8),
+  ('20000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'Just deployed our custom sharding layer for the CEOWEB stream! Latency dropped under 18ms across all WebSocket regions.', ARRAY['https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80'], 'study', 'public', 34, 8),
   ('20000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000002', 'Finished round 4 of the campus hackathon! Our agentic assistant just synthesized 40 papers in under a minute.', ARRAY['https://images.unsplash.com/photo-1516321318423-f06f85e504b3?auto=format&fit=crop&w=800&q=80'], 'creative', 'public', 52, 14)
 ON CONFLICT (id) DO NOTHING;

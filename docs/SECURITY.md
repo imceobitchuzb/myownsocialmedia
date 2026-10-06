@@ -1,4 +1,4 @@
-# NinjaLoop Security & Row Level Security (RLS)
+# CEOWEB Security & Row Level Security (RLS)
 
 ## 1. Principles
 - **Least Privilege**: Users only access records explicitly allowed by active policies.

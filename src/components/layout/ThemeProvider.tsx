@@ -15,7 +15,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [theme, setTheme] = useState<Theme>('dark');
 
   useEffect(() => {
-    const saved = localStorage.getItem('ninjaloop_theme') as Theme;
+    const saved = localStorage.getItem('ceoweb_theme') as Theme;
     if (saved) {
       setTheme(saved);
       document.documentElement.classList.toggle('dark', saved === 'dark');
@@ -27,7 +27,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const toggleTheme = () => {
     const next = theme === 'dark' ? 'light' : 'dark';
     setTheme(next);
-    localStorage.setItem('ninjaloop_theme', next);
+    localStorage.setItem('ceoweb_theme', next);
     if (next === 'dark') {
       document.documentElement.classList.add('dark');
     } else {

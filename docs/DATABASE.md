@@ -1,4 +1,4 @@
-# NinjaLoop Database Architecture
+# CEOWEB Database Architecture
 
 ## Entity-Relationship Diagram (Mermaid)
 

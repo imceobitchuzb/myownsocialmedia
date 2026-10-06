@@ -37,7 +37,7 @@ export const Sidebar: React.FC<{ onOpenFocusMode?: () => void; onOpenSnapCamera?
     { label: 'Weekly Challenges', href: '/challenges', icon: Trophy },
     { label: 'Messages', href: '/messages', icon: MessageSquare },
     { label: 'Communities', href: '/communities', icon: Users },
-    { label: 'My Wall & Profile', href: currentUser ? `/profile/${currentUser.username}` : '/profile/demo_ninja', icon: UserIcon },
+    { label: 'My Wall & Profile', href: currentUser ? `/profile/${currentUser.username}` : '/profile/demo_user', icon: UserIcon },
     { label: 'Moderation', href: '/admin/moderation', icon: ShieldAlert, adminOnly: true },
   ];
 
@@ -46,14 +46,8 @@ export const Sidebar: React.FC<{ onOpenFocusMode?: () => void; onOpenSnapCamera?
       <div className="flex flex-col gap-6">
         {/* Brand Header */}
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2.5 group">
-            <Logo size={36} />
-            <div>
-              <span className="font-extrabold text-xl tracking-tight bg-gradient-to-r from-rose-500 to-cyan-500 bg-clip-text text-transparent">
-                NinjaLoop
-              </span>
-              <p className="text-[10px] text-muted-foreground uppercase font-semibold tracking-wider">Social Dojo</p>
-            </div>
+          <Link href="/" className="flex items-center group">
+            <Logo size={36} showWordmark={true} />
           </Link>
           <button
             onClick={toggleTheme}

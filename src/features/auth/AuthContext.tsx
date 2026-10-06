@@ -21,7 +21,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     // Load persisted demo session or default to the guest demo user
-    const saved = localStorage.getItem('ninjaloop_user');
+    const saved = localStorage.getItem('ceoweb_user');
     if (saved) {
       try {
         setCurrentUser(JSON.parse(saved));
@@ -39,19 +39,19 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const loginAsDemo = (userId = 'user-demo') => {
     const user = SEED_USERS.find(u => u.id === userId) || SEED_USERS[0];
     setCurrentUser(user);
-    localStorage.setItem('ninjaloop_user', JSON.stringify(user));
+    localStorage.setItem('ceoweb_user', JSON.stringify(user));
   };
 
   const logout = () => {
     setCurrentUser(null);
-    localStorage.removeItem('ninjaloop_user');
+    localStorage.removeItem('ceoweb_user');
   };
 
   const updateCurrentUser = (updates: Partial<User>) => {
     if (!currentUser) return;
     const updated = { ...currentUser, ...updates };
     setCurrentUser(updated);
-    localStorage.setItem('ninjaloop_user', JSON.stringify(updated));
+    localStorage.setItem('ceoweb_user', JSON.stringify(updated));
   };
 
   const addXP = (amount: number) => {
