@@ -23,6 +23,7 @@ import { Logo } from '@/components/shared/Logo';
 import { BeltBadge } from '@/components/shared/BeltBadge';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useTheme } from '@/components/layout/ThemeProvider';
+import { useI18n } from '@/features/i18n/LanguageContext';
 import { cn } from '@/lib/utils';
 
 export const Sidebar: React.FC<{ onOpenFocusMode?: () => void; onOpenSnapCamera?: () => void }> = ({
@@ -30,20 +31,21 @@ export const Sidebar: React.FC<{ onOpenFocusMode?: () => void; onOpenSnapCamera?
   onOpenSnapCamera
 }) => {
   const pathname = usePathname();
-  const { currentUser, loginAsDemo } = useAuth();
+  const { currentUser } = useAuth();
   const { theme, toggleTheme } = useTheme();
+  const { lang, setLang, t } = useI18n();
 
   const navItems = [
-    { label: 'Feed & Wall', href: '/', icon: Home },
-    { label: 'Friends Radar', href: '/map', icon: MapPin },
-    { label: 'Live Streams', href: '/live', icon: Radio, badge: 'Live' },
-    { label: 'Story Chains', href: '/chains', icon: Sparkles, badge: 'Hot' },
-    { label: 'Weekly Challenges', href: '/challenges', icon: Trophy },
-    { label: 'Messages', href: '/messages', icon: MessageSquare },
-    { label: 'Communities', href: '/communities', icon: Users },
-    { label: 'My Wall & Profile', href: currentUser ? `/profile/${currentUser.username}` : '/profile/demo_user', icon: UserIcon },
-    { label: 'Settings & Privacy', href: '/settings', icon: Sparkles },
-    { label: 'Moderation', href: '/admin/moderation', icon: ShieldAlert, adminOnly: true },
+    { label: t.feed_wall, href: '/', icon: Home },
+    { label: t.friends_radar, href: '/map', icon: MapPin },
+    { label: t.live_streams, href: '/live', icon: Radio, badge: 'Live' },
+    { label: t.story_chains, href: '/chains', icon: Sparkles, badge: 'Hot' },
+    { label: t.weekly_challenges, href: '/challenges', icon: Trophy },
+    { label: t.messages, href: '/messages', icon: MessageSquare },
+    { label: t.communities, href: '/communities', icon: Users },
+    { label: t.my_wall, href: currentUser ? `/profile/${currentUser.username}` : '/profile/ceo_founder', icon: UserIcon },
+    { label: t.settings_privacy, href: '/settings', icon: Sparkles },
+    { label: t.moderation, href: '/admin/moderation', icon: ShieldAlert, adminOnly: true },
   ];
 
   return (
@@ -118,13 +120,22 @@ export const Sidebar: React.FC<{ onOpenFocusMode?: () => void; onOpenSnapCamera?
 
       {/* Action shortcuts: Snap Camera & Focus Mode */}
       <div className="flex flex-col gap-2 pt-4 border-t border-border">
+        {/* Language switch button */}
+        <button
+          onClick={() => setLang(lang === 'ru' ? 'en' : 'ru')}
+          className="w-full flex items-center justify-between py-1.5 px-3 rounded-xl font-medium text-xs bg-secondary/60 hover:bg-secondary text-foreground transition"
+        >
+          <span>{t.language}</span>
+          <span className="font-bold text-primary uppercase">{lang}</span>
+        </button>
+
         {onOpenSnapCamera && (
           <button
             onClick={onOpenSnapCamera}
             className="w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-md shadow-rose-500/20 hover:opacity-95 transition"
           >
             <Camera className="w-4 h-4" />
-            <span>Send Quick Snap</span>
+            <span>{t.send_quick_snap}</span>
           </button>
         )}
         {onOpenFocusMode && (
@@ -133,7 +144,7 @@ export const Sidebar: React.FC<{ onOpenFocusMode?: () => void; onOpenSnapCamera?
             className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl font-medium text-xs bg-secondary/80 hover:bg-secondary text-foreground transition"
           >
             <Timer className="w-3.5 h-3.5 text-cyan-400" />
-            <span>Focus Mode (Healthy Use)</span>
+            <span>{t.focus_mode}</span>
           </button>
         )}
       </div>

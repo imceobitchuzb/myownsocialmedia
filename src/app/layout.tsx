@@ -2,9 +2,9 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import './globals.css';
 import { ThemeProvider } from '@/components/layout/ThemeProvider';
+import { LanguageProvider } from '@/features/i18n/LanguageContext';
 import { AuthProvider } from '@/features/auth/AuthContext';
 import { MainLayout } from '@/components/layout/MainLayout';
-import { BackendModeIndicator } from '@/components/shared/BackendModeIndicator';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -22,10 +22,11 @@ export default function RootLayout({
     <html lang="en" suppressHydrationWarning>
       <body className={inter.className}>
         <ThemeProvider>
-          <AuthProvider>
-            <MainLayout>{children}</MainLayout>
-            <BackendModeIndicator />
-          </AuthProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <MainLayout>{children}</MainLayout>
+            </AuthProvider>
+          </LanguageProvider>
         </ThemeProvider>
       </body>
     </html>

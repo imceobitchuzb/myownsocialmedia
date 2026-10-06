@@ -2,16 +2,17 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/features/auth/AuthContext';
+import { useI18n } from '@/features/i18n/LanguageContext';
 import { SEED_POSTS, SEED_STORIES } from '@/lib/seedData';
 import { Post, Story } from '@/types/models';
 import { PostCard } from '@/features/feed/PostCard';
 import { StoriesTray } from '@/features/stories/StoriesTray';
-import { XPProgressBar } from '@/components/shared/XPProgressBar';
-import { Sparkles, Image as ImageIcon, Smile, Send } from 'lucide-react';
+import { Image as ImageIcon, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 export default function FeedPage() {
   const { currentUser, addXP } = useAuth();
+  const { t } = useI18n();
   const [posts, setPosts] = useState<Post[]>(SEED_POSTS);
   const [stories, setStories] = useState<Story[]>(SEED_STORIES);
   const [activeMood, setActiveMood] = useState<string>('all');
@@ -21,11 +22,11 @@ export default function FeedPage() {
   const [showMediaInput, setShowMediaInput] = useState(false);
 
   const moodFilters = [
-    { id: 'all', label: 'All Moods', icon: '🌀' },
-    { id: 'chill', label: 'Chill', icon: '🍃' },
-    { id: 'funny', label: 'Funny', icon: '😂' },
-    { id: 'creative', label: 'Creative', icon: '🎨' },
-    { id: 'study', label: 'Study & Code', icon: '📚' },
+    { id: 'all', label: t.all_moods, icon: '🌀' },
+    { id: 'chill', label: t.chill, icon: '🍃' },
+    { id: 'funny', label: t.funny, icon: '😂' },
+    { id: 'creative', label: t.creative, icon: '🎨' },
+    { id: 'study', label: t.study, icon: '📚' },
   ];
 
   const handleCreatePost = (e: React.FormEvent) => {
@@ -96,7 +97,7 @@ export default function FeedPage() {
             <textarea
               value={newPostContent}
               onChange={(e) => setNewPostContent(e.target.value)}
-              placeholder="What are you mastering or crafting today? (+25 XP for posting)..."
+              placeholder={t.what_are_you_crafting}
               rows={2}
               className="w-full bg-secondary/40 border border-border/60 rounded-xl p-3 text-sm focus:outline-none focus:ring-1 focus:ring-primary resize-none"
             />
@@ -105,7 +106,7 @@ export default function FeedPage() {
           {showMediaInput && (
             <input
               type="text"
-              placeholder="Image URL (e.g. Unsplash URL)..."
+              placeholder="URL изображения..."
               value={mediaInput}
               onChange={(e) => setMediaInput(e.target.value)}
               className="bg-secondary/60 border border-border rounded-xl px-3 py-2 text-xs focus:outline-none"
@@ -120,17 +121,17 @@ export default function FeedPage() {
                 className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-secondary text-xs flex items-center gap-1.5 transition"
               >
                 <ImageIcon className="w-4 h-4 text-cyan-400" />
-                <span>Media</span>
+                <span>{t.media}</span>
               </button>
               <select
                 value={selectedMood}
                 onChange={(e) => setSelectedMood(e.target.value as any)}
                 className="bg-secondary border border-border rounded-lg px-2 py-1 text-xs font-medium focus:outline-none"
               >
-                <option value="chill">🍃 Chill</option>
-                <option value="funny">😂 Funny</option>
-                <option value="creative">🎨 Creative</option>
-                <option value="study">📚 Study & Code</option>
+                <option value="chill">🍃 {t.chill}</option>
+                <option value="funny">😂 {t.funny}</option>
+                <option value="creative">🎨 {t.creative}</option>
+                <option value="study">📚 {t.study}</option>
               </select>
             </div>
 
@@ -140,7 +141,7 @@ export default function FeedPage() {
               className="px-4 py-2 bg-primary text-primary-foreground text-xs font-semibold rounded-xl hover:opacity-90 disabled:opacity-50 transition flex items-center gap-1.5 shadow-sm shadow-primary/20"
             >
               <Send className="w-3.5 h-3.5" />
-              <span>Post to Wall</span>
+              <span>{t.post_to_wall}</span>
             </button>
           </div>
         </form>

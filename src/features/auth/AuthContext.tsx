@@ -7,7 +7,7 @@ import { SEED_USERS } from '@/lib/seedData';
 interface AuthContextType {
   currentUser: User | null;
   isLoading: boolean;
-  loginAsDemo: (userId?: string) => void;
+  setCurrentUser: (user: User | null) => void;
   logout: () => void;
   updateCurrentUser: (updates: Partial<User>) => void;
   addXP: (amount: number) => void;
@@ -16,41 +16,44 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUserState] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Load persisted demo session or default to the guest demo user
+    // Load authenticated user session
     const saved = localStorage.getItem('ceoweb_user');
     if (saved) {
       try {
-        setCurrentUser(JSON.parse(saved));
+        setCurrentUserState(JSON.parse(saved));
       } catch {
-        const demo = SEED_USERS.find(u => u.id === 'user-demo') || SEED_USERS[0];
-        setCurrentUser(demo);
+        const defaultUser = SEED_USERS.find(u => u.id === 'user-me') || SEED_USERS[0];
+        setCurrentUserState(defaultUser);
       }
     } else {
-      const demo = SEED_USERS.find(u => u.id === 'user-demo') || SEED_USERS[0];
-      setCurrentUser(demo);
+      const defaultUser = SEED_USERS.find(u => u.id === 'user-me') || SEED_USERS[0];
+      setCurrentUserState(defaultUser);
     }
     setIsLoading(false);
   }, []);
 
-  const loginAsDemo = (userId = 'user-demo') => {
-    const user = SEED_USERS.find(u => u.id === userId) || SEED_USERS[0];
-    setCurrentUser(user);
-    localStorage.setItem('ceoweb_user', JSON.stringify(user));
+  const setCurrentUser = (user: User | null) => {
+    setCurrentUserState(user);
+    if (user) {
+      localStorage.setItem('ceoweb_user', JSON.stringify(user));
+    } else {
+      localStorage.removeItem('ceoweb_user');
+    }
   };
 
   const logout = () => {
-    setCurrentUser(null);
+    setCurrentUserState(null);
     localStorage.removeItem('ceoweb_user');
   };
 
   const updateCurrentUser = (updates: Partial<User>) => {
     if (!currentUser) return;
     const updated = { ...currentUser, ...updates };
-    setCurrentUser(updated);
+    setCurrentUserState(updated);
     localStorage.setItem('ceoweb_user', JSON.stringify(updated));
   };
 
@@ -65,7 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       value={{
         currentUser,
         isLoading,
-        loginAsDemo,
+        setCurrentUser,
         logout,
         updateCurrentUser,
         addXP,

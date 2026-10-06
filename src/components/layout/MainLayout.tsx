@@ -26,7 +26,7 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
     { label: 'Chains', href: '/chains', icon: Sparkles },
     { label: 'Challenges', href: '/challenges', icon: Trophy },
     { label: 'Chat', href: '/messages', icon: MessageSquare },
-    { label: 'Profile', href: currentUser ? `/profile/${currentUser.username}` : '/profile/demo_user', icon: UserIcon },
+    { label: 'Profile', href: currentUser ? `/profile/${currentUser.username}` : '/profile/ceo_founder', icon: UserIcon },
   ];
 
   return (

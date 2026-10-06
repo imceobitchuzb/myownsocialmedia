@@ -2,6 +2,7 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/features/auth/AuthContext';
+import { useI18n } from '@/features/i18n/LanguageContext';
 import { User, UserPrivacySettings } from '@/types/models';
 import {
   Shield,
@@ -11,13 +12,14 @@ import {
   Download,
   Trash2,
   Check,
-  AlertCircle
+  Languages
 } from 'lucide-react';
 
 export default function SettingsPage() {
   const { currentUser, updateCurrentUser, logout } = useAuth();
+  const { lang, setLang, t } = useI18n();
 
-  const [activeTab, setActiveTab] = useState<'profile' | 'privacy' | 'account' | 'appearance'>('profile');
+  const [activeTab, setActiveTab] = useState<'profile' | 'privacy' | 'appearance' | 'account'>('profile');
   const [displayName, setDisplayName] = useState(currentUser?.display_name || '');
   const [username, setUsername] = useState(currentUser?.username || '');
   const [bio, setBio] = useState(currentUser?.bio || '');
@@ -94,18 +96,39 @@ export default function SettingsPage() {
     <div className="max-w-2xl mx-auto flex flex-col gap-6">
       {/* Settings Header */}
       <div className="bg-card border border-border/80 rounded-3xl p-6 shadow-sm">
-        <h1 className="text-2xl font-bold tracking-tight">Executive Settings</h1>
-        <p className="text-xs text-muted-foreground mt-1">
-          Customize your profile, configure privacy boundaries, manage security, and export data.
-        </p>
+        <div className="flex items-center justify-between mb-2">
+          <div>
+            <h1 className="text-2xl font-bold tracking-tight">{t.settings_title}</h1>
+            <p className="text-xs text-muted-foreground mt-0.5">{t.settings_subtitle}</p>
+          </div>
+          {/* Language Switcher Buttons */}
+          <div className="flex items-center gap-1.5 bg-secondary p-1 rounded-2xl border border-border/60">
+            <button
+              onClick={() => setLang('ru')}
+              className={`px-3 py-1 rounded-xl text-xs font-bold transition ${
+                lang === 'ru' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              Русский
+            </button>
+            <button
+              onClick={() => setLang('en')}
+              className={`px-3 py-1 rounded-xl text-xs font-bold transition ${
+                lang === 'en' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              English
+            </button>
+          </div>
+        </div>
 
         {/* Tab Switcher */}
-        <div className="flex gap-2 mt-5 border-b border-border/60 pb-2 overflow-x-auto scrollbar-none">
+        <div className="flex gap-2 mt-4 border-t border-border/60 pt-3 overflow-x-auto scrollbar-none">
           {[
-            { id: 'profile', label: 'Profile Details', icon: UserIcon },
-            { id: 'privacy', label: 'Privacy & Permissions', icon: Shield },
-            { id: 'appearance', label: 'Appearance', icon: Palette },
-            { id: 'account', label: 'Account & Data', icon: Lock },
+            { id: 'profile', label: t.profile_tab, icon: UserIcon },
+            { id: 'privacy', label: t.privacy_tab, icon: Shield },
+            { id: 'appearance', label: t.appearance_tab, icon: Palette },
+            { id: 'account', label: t.account_tab, icon: Lock },
           ].map((tab) => {
             const Icon = tab.icon;
             const isActive = activeTab === tab.id;
