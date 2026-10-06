@@ -11,6 +11,10 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { cn } from '@/lib/utils';
 
+import { socialDataService } from '@/lib/socialDataService';
+
+import { SEED_USERS } from '@/lib/seedData';
+
 export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [isFocusModeOpen, setIsFocusModeOpen] = useState(false);
   const [isSnapCameraOpen, setIsSnapCameraOpen] = useState(false);
@@ -18,6 +22,20 @@ export const MainLayout: React.FC<{ children: React.ReactNode }> = ({ children }
   const pathname = usePathname();
 
   const handleSendSnap = (recipientId: string, mediaUrl: string, caption: string) => {
+    if (currentUser) {
+      const recipientUser = SEED_USERS.find((u) => u.id === recipientId) || currentUser;
+      socialDataService.sendSnap({
+        id: `snap-${Date.now()}`,
+        sender_id: currentUser.id,
+        sender: currentUser,
+        recipient_id: recipientId,
+        recipient: recipientUser,
+        media_url: mediaUrl,
+        caption: caption || undefined,
+        status: 'delivered',
+        created_at: new Date().toISOString(),
+      });
+    }
     addXP(20);
   };
 

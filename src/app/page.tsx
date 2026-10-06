@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/features/auth/AuthContext';
 import { useI18n } from '@/features/i18n/LanguageContext';
 import { SEED_POSTS, SEED_STORIES } from '@/lib/seedData';
@@ -9,6 +9,7 @@ import { PostCard } from '@/features/feed/PostCard';
 import { StoriesTray } from '@/features/stories/StoriesTray';
 import { Image as ImageIcon, Send } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { socialDataService } from '@/lib/socialDataService';
 
 export default function FeedPage() {
   const { currentUser, addXP } = useAuth();
@@ -21,6 +22,19 @@ export default function FeedPage() {
   const [mediaInput, setMediaInput] = useState('');
   const [showMediaInput, setShowMediaInput] = useState(false);
 
+  useEffect(() => {
+    socialDataService.getPosts().then((loadedPosts) => {
+      if (loadedPosts && loadedPosts.length > 0) {
+        setPosts(loadedPosts);
+      }
+    });
+    socialDataService.getStories().then((loadedStories) => {
+      if (loadedStories && loadedStories.length > 0) {
+        setStories(loadedStories);
+      }
+    });
+  }, []);
+
   const moodFilters = [
     { id: 'all', label: t.all_moods, icon: '🌀' },
     { id: 'chill', label: t.chill, icon: '🍃' },
@@ -29,7 +43,7 @@ export default function FeedPage() {
     { id: 'study', label: t.study, icon: '📚' },
   ];
 
-  const handleCreatePost = (e: React.FormEvent) => {
+  const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newPostContent.trim() || !currentUser) return;
 
@@ -47,6 +61,7 @@ export default function FeedPage() {
       created_at: new Date().toISOString(),
     };
 
+    await socialDataService.createPost(newPost);
     setPosts([newPost, ...posts]);
     setNewPostContent('');
     setMediaInput('');
@@ -54,7 +69,7 @@ export default function FeedPage() {
     addXP(25); // Award +25 XP
   };
 
-  const handleAddStory = (imageUrl: string, text: string) => {
+  const handleAddStory = async (imageUrl: string, text: string) => {
     if (!currentUser) return;
     const newStory: Story = {
       id: `story-${Date.now()}`,
@@ -66,6 +81,7 @@ export default function FeedPage() {
       created_at: new Date().toISOString(),
       expires_at: new Date(Date.now() + 24 * 3600 * 1000).toISOString(),
     };
+    await socialDataService.createStory(newStory);
     setStories([newStory, ...stories]);
     addXP(25);
   };
@@ -176,7 +192,12 @@ export default function FeedPage() {
             key={post.id}
             post={post}
             currentUser={currentUser}
-            onLikeToggle={() => addXP(5)}
+            onLikeToggle={async () => {
+              if (currentUser) {
+                await socialDataService.toggleLikePost(post.id, currentUser.id);
+              }
+              addXP(5);
+            }}
             onAddComment={() => addXP(10)}
           />
         ))}
