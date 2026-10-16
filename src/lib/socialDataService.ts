@@ -66,7 +66,7 @@ export const socialDataService = {
           .from('posts')
           .select('*, author:profiles(*)')
           .order('created_at', { ascending: false });
-        if (!error && data && data.length > 0) {
+        if (!error && data) {
           return data as unknown as Post[];
         }
       } catch (err) {
@@ -704,15 +704,19 @@ export const socialDataService = {
     const visibility = params.visibility || 'friends';
     const nowIso = new Date().toISOString();
 
+    // Fuzz coordinates to ~500m grid for privacy BEFORE writing to DB or cache
+    const fuzzed = fuzzCoordinates({ lat: params.lat, lng: params.lng });
+
     if (isRealSupabaseConfigured() && supabase) {
       try {
         await supabase
           .from('profiles')
           .update({
-            latitude: params.sharingEnabled && visibility !== 'nobody' ? params.lat : null,
-            longitude: params.sharingEnabled && visibility !== 'nobody' ? params.lng : null,
+            latitude: params.sharingEnabled && visibility !== 'nobody' ? fuzzed.lat : null,
+            longitude: params.sharingEnabled && visibility !== 'nobody' ? fuzzed.lng : null,
             ghost_mode: !params.sharingEnabled || visibility === 'nobody',
             location_city: params.city || null,
+            updated_at: nowIso,
           })
           .eq('id', params.userId);
       } catch (err) {
@@ -729,9 +733,6 @@ export const socialDataService = {
       setLocal(STORAGE_KEY_LOCATIONS, locations);
       return null;
     }
-
-    // Fuzz coordinates to ~500m grid for privacy
-    const fuzzed = fuzzCoordinates({ lat: params.lat, lng: params.lng });
 
     const record: UserLocation = {
       userId: params.userId,
@@ -753,6 +754,57 @@ export const socialDataService = {
   },
 
   async getFriendsLocations(viewerId: string): Promise<UserLocation[]> {
+    if (isRealSupabaseConfigured() && supabase) {
+      try {
+        const { data: profiles, error: profErr } = await supabase
+          .from('profiles')
+          .select('*')
+          .not('latitude', 'is', null)
+          .not('longitude', 'is', null)
+          .eq('ghost_mode', false);
+
+        if (!profErr && profiles) {
+          const { data: followRows } = await supabase
+            .from('follows')
+            .select('following_id')
+            .eq('follower_id', viewerId);
+
+          const followingSet = new Set((followRows || []).map((r: any) => r.following_id));
+          const results: UserLocation[] = [];
+
+          for (const p of profiles) {
+            const isOwner = p.id === viewerId;
+            const isFriend = followingSet.has(p.id) || isOwner;
+            const sharingEnabled = !p.ghost_mode;
+            const visibility = (p.location_visibility as any) || 'friends';
+
+            if (!canViewerSeeLocation(sharingEnabled, visibility, isFriend, isOwner)) {
+              continue;
+            }
+
+            const updatedAt = p.updated_at || new Date().toISOString();
+            const isStale = !isLocationActive(updatedAt);
+
+            results.push({
+              userId: p.id,
+              user: p as unknown as User,
+              lat: p.latitude,
+              lng: p.longitude,
+              city: p.location_city || undefined,
+              statusText: p.status_line || undefined,
+              updatedAt,
+              sharingEnabled: true,
+              visibility,
+              isStale,
+            });
+          }
+          return results;
+        }
+      } catch (err) {
+        console.error('Supabase getFriendsLocations error:', err);
+      }
+    }
+
     const locations = getLocal<Record<string, UserLocation>>(STORAGE_KEY_LOCATIONS, {});
     const result: UserLocation[] = [];
 
