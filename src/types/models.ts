@@ -33,6 +33,25 @@ export interface User {
   pinned_post_id?: string;
   privacy_settings?: UserPrivacySettings;
   username_last_changed?: string;
+  location_sharing?: boolean;
+  location_visibility?: 'friends' | 'public' | 'nobody';
+  location_updated_at?: string;
+  latitude?: number;
+  longitude?: number;
+}
+
+export interface UserLocation {
+  userId: string;
+  user: User;
+  lat: number;
+  lng: number;
+  accuracyMeters?: number;
+  city?: string;
+  statusText?: string;
+  updatedAt: string;
+  sharingEnabled: boolean;
+  visibility: 'friends' | 'public' | 'nobody';
+  isStale?: boolean;
 }
 
 export interface Post {

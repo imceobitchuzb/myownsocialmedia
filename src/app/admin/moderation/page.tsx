@@ -45,9 +45,9 @@ export default function ModerationPage() {
           <ShieldAlert className="w-5 h-5" />
           <span className="text-xs font-bold uppercase tracking-wider">Admin Dojo Guard</span>
         </div>
-        <h1 className="text-2xl font-black tracking-tight mb-2">Content Moderation & Safety</h1>
+        <h1 className="text-2xl font-black tracking-tight mb-2 text-foreground">Content Moderation & Safety</h1>
         <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
-          Review community reports, enforce the CEOWEB code of honor, and maintain safety for all clan members (13+ compliance).
+          Review community reports, enforce SocialMediaUZ safety standards, and maintain platform integrity.
         </p>
       </div>
 

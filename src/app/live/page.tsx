@@ -49,11 +49,11 @@ export default function LiveStreamingPage() {
         <div>
           <div className="flex items-center gap-2 text-rose-500 mb-1">
             <Radio className="w-5 h-5 animate-pulse" />
-            <span className="text-xs font-bold uppercase tracking-wider">Live Broadcast Dojo</span>
+            <span className="text-xs font-bold uppercase tracking-wider">SocialMediaUZ Live Stream</span>
           </div>
-          <h1 className="text-xl sm:text-2xl font-black tracking-tight">{streamTitle}</h1>
+          <h1 className="text-xl sm:text-2xl font-black tracking-tight text-foreground">{streamTitle}</h1>
           <p className="text-xs text-muted-foreground mt-0.5">
-            Low-latency LiveKit broadcast • Free virtual sparks enabled
+            Низкая задержка • Интерактивный чат • Виртуальные искры
           </p>
         </div>
 

@@ -68,10 +68,10 @@ export const AuthModal: React.FC<AuthModalProps> = ({ isOpen, onClose }) => {
             </div>
             <div>
               <h3 className="font-bold text-base">
-                {mode === 'login' ? 'Вход в CEOWEB' : mode === 'register' ? 'Создать аккаунт' : 'Переключение профиля'}
+                {mode === 'login' ? 'Вход в SocialMediaUZ' : mode === 'register' ? 'Создать аккаунт' : 'Переключение профиля'}
               </h3>
               <p className="text-xs text-muted-foreground">
-                {mode === 'switch' ? 'Выберите активного пользователя' : 'Безопасная аутентификация Supabase'}
+                {mode === 'switch' ? 'Выберите активного пользователя' : 'Безопасная аутентификация SocialMediaUZ'}
               </p>
             </div>
           </div>

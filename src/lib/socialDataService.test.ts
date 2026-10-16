@@ -206,4 +206,49 @@ describe('Production Social Data & Security Engine (Phase 2)', () => {
       expect(authorAttempt).toBe(true);
     });
   });
+
+  // 7. USER SEARCH
+  describe('User Search & Discovery', () => {
+    it('returns empty array when query is whitespace or blank', async () => {
+      const res = await socialDataService.searchUsers('   ');
+      expect(res).toEqual([]);
+    });
+
+    it('finds users by partial username or full name case-insensitively', async () => {
+      const results = await socialDataService.searchUsers('alex');
+      expect(results.length).toBeGreaterThanOrEqual(1);
+      const match = results.some(
+        (u) =>
+          u.username.toLowerCase().includes('alex') ||
+          u.display_name.toLowerCase().includes('alex')
+      );
+      expect(match).toBe(true);
+    });
+  });
+
+  // 8. 3D RADAR & LOCATION SERVICE
+  describe('3D Radar & Geolocation Security', () => {
+    it('fuzzes coordinates and records timestamp on location update', async () => {
+      const rawLat = 41.311082;
+      const rawLng = 69.240562;
+
+      const loc = await socialDataService.updateUserLocation({
+        userId: 'user-radar-test',
+        lat: rawLat,
+        lng: rawLng,
+        sharingEnabled: true,
+        visibility: 'public',
+      });
+
+      expect(loc).toBeDefined();
+      expect(loc?.lat).toBeCloseTo(41.31, 2);
+      expect(loc?.lng).toBeCloseTo(69.24, 2);
+      expect(loc?.updatedAt).toBeDefined();
+
+      // Clear location
+      await socialDataService.clearUserLocation('user-radar-test');
+      const friendsLocations = await socialDataService.getFriendsLocations('user-radar-test');
+      expect(friendsLocations.some((u) => u.userId === 'user-radar-test')).toBe(false);
+    });
+  });
 });

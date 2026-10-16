@@ -78,16 +78,16 @@ export default function SettingsPage() {
     const dataStr = 'data:text/json;charset=utf-8,' + encodeURIComponent(JSON.stringify(currentUser, null, 2));
     const downloadAnchor = document.createElement('a');
     downloadAnchor.setAttribute('href', dataStr);
-    downloadAnchor.setAttribute('download', `ceoweb_export_${currentUser?.username || 'user'}.json`);
+    downloadAnchor.setAttribute('download', `socialmediauz_export_${currentUser?.username || 'user'}.json`);
     document.body.appendChild(downloadAnchor);
     downloadAnchor.click();
     downloadAnchor.remove();
   };
 
   const handleDeleteAccount = () => {
-    if (confirm('Are you absolutely sure you want to permanently delete your CEOWEB account and erase all associated data?')) {
+    if (confirm('Вы уверены, что хотите удалить аккаунт SocialMediaUZ и стереть все связанные данные?')) {
       logout();
-      alert('Your account and associated profile data have been permanently wiped.');
+      alert('Ваш аккаунт и данные профиля успешно удалены.');
       window.location.href = '/';
     }
   };

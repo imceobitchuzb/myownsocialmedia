@@ -1,9 +1,11 @@
-import { User, Post, Story, SnapMessage, StoryChain, WeeklyChallenge, NotificationItem } from '../types/models';
+import { User, Post, Comment, Story, SnapMessage, StoryChain, WeeklyChallenge, NotificationItem, UserLocation } from '../types/models';
 import { SEED_USERS, SEED_POSTS, SEED_STORIES, SEED_CHAINS, SEED_CHALLENGES } from './seedData';
 import { isRealSupabaseConfigured, supabase } from './supabase/client';
 import { getBeltRank } from './gamification';
+import { fuzzCoordinates, isLocationActive, canViewerSeeLocation } from './locationPrivacy';
 
 const STORAGE_KEY_POSTS = 'ceoweb_store_posts';
+const STORAGE_KEY_COMMENTS = 'ceoweb_store_comments';
 const STORAGE_KEY_STORIES = 'ceoweb_store_stories';
 const STORAGE_KEY_SNAPS = 'ceoweb_store_snaps';
 const STORAGE_KEY_NOTIFICATIONS = 'ceoweb_store_notifications';
@@ -11,6 +13,7 @@ const STORAGE_KEY_CHAINS = 'ceoweb_store_chains';
 const STORAGE_KEY_CHALLENGES = 'ceoweb_store_challenges';
 const STORAGE_KEY_FOLLOWS = 'ceoweb_store_follows';
 const STORAGE_KEY_XP_LEDGER = 'ceoweb_store_xp_ledger';
+const STORAGE_KEY_LOCATIONS = 'smuz_store_locations';
 
 // In-memory cache for fast runtime & Node test execution
 const memoryCache = new Map<string, any>();
@@ -180,6 +183,74 @@ export const socialDataService = {
     });
     setLocal(STORAGE_KEY_POSTS, updated);
     return result;
+  },
+
+  // ==========================================
+  // COMMENTS
+  // ==========================================
+  async getComments(postId: string): Promise<Comment[]> {
+    if (isRealSupabaseConfigured() && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('comments')
+          .select('*, author:profiles(*)')
+          .eq('post_id', postId)
+          .order('created_at', { ascending: true });
+        if (!error && data && data.length > 0) {
+          return data as unknown as Comment[];
+        }
+      } catch (err) {
+        console.error('Supabase getComments error:', err);
+      }
+    }
+
+    const allComments = getLocal<Comment[]>(STORAGE_KEY_COMMENTS, []);
+    return allComments.filter((c) => c.post_id === postId);
+  },
+
+  async addComment(
+    postId: string,
+    payload: { author_id: string; author: User; content: string }
+  ): Promise<Comment> {
+    const newComment: Comment = {
+      id: `comment-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
+      post_id: postId,
+      author_id: payload.author_id,
+      author: payload.author,
+      content: payload.content,
+      created_at: new Date().toISOString(),
+    };
+
+    if (isRealSupabaseConfigured() && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('comments')
+          .insert({
+            id: newComment.id,
+            post_id: postId,
+            author_id: payload.author_id,
+            content: payload.content,
+          })
+          .select('*, author:profiles(*)')
+          .single();
+        if (!error && data) {
+          return data as unknown as Comment;
+        }
+      } catch (err) {
+        console.error('Supabase addComment error:', err);
+      }
+    }
+
+    const allComments = getLocal<Comment[]>(STORAGE_KEY_COMMENTS, []);
+    setLocal(STORAGE_KEY_COMMENTS, [...allComments, newComment]);
+
+    const currentPosts = getLocal<Post[]>(STORAGE_KEY_POSTS, SEED_POSTS);
+    const updatedPosts = currentPosts.map((p) =>
+      p.id === postId ? { ...p, comments_count: (p.comments_count || 0) + 1 } : p
+    );
+    setLocal(STORAGE_KEY_POSTS, updatedPosts);
+
+    return newComment;
   },
 
   // ==========================================
@@ -615,5 +686,146 @@ export const socialDataService = {
     const notifs = getLocal<NotificationItem[]>(STORAGE_KEY_NOTIFICATIONS, []);
     const updated = notifs.map((n) => (n.recipient_id === userId ? { ...n, is_read: true } : n));
     setLocal(STORAGE_KEY_NOTIFICATIONS, updated);
+  },
+
+  // ==========================================
+  // 8. 3D RADAR & REAL GEOLOCATION
+  // ==========================================
+  async updateUserLocation(params: {
+    userId: string;
+    lat: number;
+    lng: number;
+    accuracyMeters?: number;
+    city?: string;
+    statusText?: string;
+    sharingEnabled: boolean;
+    visibility?: 'friends' | 'public' | 'nobody';
+  }): Promise<UserLocation | null> {
+    const visibility = params.visibility || 'friends';
+    const nowIso = new Date().toISOString();
+
+    if (isRealSupabaseConfigured() && supabase) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({
+            latitude: params.sharingEnabled && visibility !== 'nobody' ? params.lat : null,
+            longitude: params.sharingEnabled && visibility !== 'nobody' ? params.lng : null,
+            ghost_mode: !params.sharingEnabled || visibility === 'nobody',
+            location_city: params.city || null,
+          })
+          .eq('id', params.userId);
+      } catch (err) {
+        console.error('Supabase updateUserLocation error:', err);
+      }
+    }
+
+    const locations = getLocal<Record<string, UserLocation>>(STORAGE_KEY_LOCATIONS, {});
+    const users = getLocal<User[]>('ceoweb_store_users', SEED_USERS);
+    const user = users.find((u) => u.id === params.userId) || SEED_USERS[0];
+
+    if (!params.sharingEnabled || visibility === 'nobody') {
+      delete locations[params.userId];
+      setLocal(STORAGE_KEY_LOCATIONS, locations);
+      return null;
+    }
+
+    // Fuzz coordinates to ~500m grid for privacy
+    const fuzzed = fuzzCoordinates({ lat: params.lat, lng: params.lng });
+
+    const record: UserLocation = {
+      userId: params.userId,
+      user,
+      lat: fuzzed.lat,
+      lng: fuzzed.lng,
+      accuracyMeters: params.accuracyMeters,
+      city: params.city,
+      statusText: params.statusText || user.status_line,
+      updatedAt: nowIso,
+      sharingEnabled: true,
+      visibility,
+      isStale: false,
+    };
+
+    locations[params.userId] = record;
+    setLocal(STORAGE_KEY_LOCATIONS, locations);
+    return record;
+  },
+
+  async getFriendsLocations(viewerId: string): Promise<UserLocation[]> {
+    const locations = getLocal<Record<string, UserLocation>>(STORAGE_KEY_LOCATIONS, {});
+    const result: UserLocation[] = [];
+
+    // Also get follows to check friendship
+    const follows = getLocal<FollowRecord[]>(STORAGE_KEY_FOLLOWS, []);
+    const followingIds = new Set(
+      follows.filter((f) => f.follower_id === viewerId).map((f) => f.following_id)
+    );
+
+    for (const [userId, loc] of Object.entries(locations)) {
+      const isOwner = userId === viewerId;
+      const isFriend = followingIds.has(userId) || isOwner;
+
+      if (!canViewerSeeLocation(loc.sharingEnabled, loc.visibility, isFriend, isOwner)) {
+        continue;
+      }
+
+      const isStale = !isLocationActive(loc.updatedAt);
+      result.push({
+        ...loc,
+        isStale,
+      });
+    }
+
+    return result;
+  },
+
+  async clearUserLocation(userId: string): Promise<void> {
+    const locations = getLocal<Record<string, UserLocation>>(STORAGE_KEY_LOCATIONS, {});
+    delete locations[userId];
+    setLocal(STORAGE_KEY_LOCATIONS, locations);
+
+    if (isRealSupabaseConfigured() && supabase) {
+      try {
+        await supabase
+          .from('profiles')
+          .update({ latitude: null, longitude: null, ghost_mode: true })
+          .eq('id', userId);
+      } catch (err) {
+        console.error('Supabase clearUserLocation error:', err);
+      }
+    }
+  },
+
+  // ==========================================
+  // 9. SEARCH USERS
+  // ==========================================
+  async searchUsers(query: string): Promise<User[]> {
+    const q = query.trim().toLowerCase();
+    if (!q) return [];
+
+    if (isRealSupabaseConfigured() && supabase) {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .or(`username.ilike.%${q}%,display_name.ilike.%${q}%,city.ilike.%${q}%`)
+          .limit(10);
+        if (!error && data && data.length > 0) {
+          return data as unknown as User[];
+        }
+      } catch (err) {
+        console.error('Supabase searchUsers error:', err);
+      }
+    }
+
+    const users = getLocal<User[]>('ceoweb_store_users', SEED_USERS);
+    return users.filter(
+      (u) =>
+        u.username.toLowerCase().includes(q) ||
+        u.display_name.toLowerCase().includes(q) ||
+        (u.city && u.city.toLowerCase().includes(q)) ||
+        (u.bio && u.bio.toLowerCase().includes(q))
+    );
   },
 };

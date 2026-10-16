@@ -17,12 +17,12 @@ export const BackendModeIndicator: React.FC = () => {
       }}
       title={
         isReal
-          ? 'CEOWEB is operating on connected Supabase Cloud/Local Postgres & Realtime'
-          : 'CEOWEB is operating in Local Evaluator Mode (Mock Store fallback active)'
+          ? 'SocialMediaUZ is operating on connected Supabase Cloud/Local Postgres & Realtime'
+          : 'SocialMediaUZ is operating in Local Evaluator Mode (Persistent Cache active)'
       }
     >
       <Database className="w-3 h-3 animate-pulse" />
-      <span>{isReal ? 'SUPABASE: LIVE' : 'BACKEND: MOCK STORE'}</span>
+      <span>{isReal ? 'SUPABASE: LIVE' : 'SMUZ: LOCAL PERSISTENCE'}</span>
     </div>
   );
 };
